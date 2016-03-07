@@ -109,7 +109,7 @@ public class MainActivity extends ActionBarActivity
     }
 
     private void getHackerrankEvents()  {
-        ProgressDialog progressDialog = ProgressDialog.show(this, "", "Loading");
+//        ProgressDialog progressDialog = ProgressDialog.show(this, "", "Loading");
         StringRequest stringRequest = new StringRequest(Request.Method.GET, jURL, new Response.Listener<String>() {
 
             @Override
@@ -159,9 +159,9 @@ public class MainActivity extends ActionBarActivity
         stringRequest.setRetryPolicy(new DefaultRetryPolicy(3000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         Volley.newRequestQueue(this).add(stringRequest);
 
-        if (progressDialog != null) {
-            progressDialog.dismiss();
-            progressDialog = null;
-        }
+//        if (progressDialog != null) {
+//            progressDialog.dismiss();
+//            progressDialog = null;
+//        }
     }
 }

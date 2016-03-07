@@ -20,7 +20,22 @@
             android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clickable="true" />
+            android:clickable="true" >
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/toolbar_actionbar">
+
+                <android.support.v7.widget.RecyclerView
+                    xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:id="@+id/mainList"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clickable="true"
+                    android:scrollbars="vertical" />
+            </FrameLayout>
+        </FrameLayout>
 
         <!-- android:layout_marginTop="?android:attr/actionBarSize"-->
         <fragment
@@ -31,36 +46,5 @@
             android:layout_gravity="start"
             app:layout="@layout/fragment_navigation_drawer" />
     </android.support.v4.widget.DrawerLayout>
-
-    <!--<LinearLayout-->
-        <!--android:orientation="vertical"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:layout_centerHorizontal="true"-->
-        <!--android:layout_alignTop="@+id/drawer">-->
-
-
-        <!--<ListView-->
-            <!--android:id="@+id/listView"-->
-            <!--android:layout_width="fill_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:divider="@color/list_divider"-->
-            <!--android:dividerHeight="1dp"-->
-            <!--android:listSelector="@drawable/list_row_selector" />-->
-
-    <!--</LinearLayout>-->
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/toolbar_actionbar">
-
-        <android.support.v7.widget.RecyclerView
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/mainList"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clickable="true"
-            android:scrollbars="vertical" />
-    </FrameLayout>
 
 </RelativeLayout>
