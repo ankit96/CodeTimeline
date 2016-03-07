@@ -4,6 +4,8 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,8 +38,9 @@ public class MainActivity extends ActionBarActivity
     private Toolbar mToolbar;
     private String jURL = "http://hxworld.xyz/json/hackerrank.php";
     private ArrayList<EventModel> events = new ArrayList<>();
-    private ListView listView;
-    private ListViewAdapter listViewAdapter;
+
+    RecyclerView recyclerView;
+    RecyclerViewAdapter recyclerViewAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,9 +57,10 @@ public class MainActivity extends ActionBarActivity
 
         getHackerrankEvents();
 
-        listView = (ListView) findViewById(R.id.listView);
-        listViewAdapter = new ListViewAdapter(this, events);
-        listView.setAdapter(listViewAdapter);
+        recyclerView = (RecyclerView) findViewById(R.id.mainList);
+        recyclerViewAdapter = new RecyclerViewAdapter(events);
+        recyclerView.setAdapter(recyclerViewAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
     }
 
@@ -130,7 +134,7 @@ public class MainActivity extends ActionBarActivity
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    listViewAdapter.notifyDataSetChanged();
+                                    recyclerViewAdapter.notifyDataSetChanged();
                                 }
                             });
                         } catch (JSONException e) {
