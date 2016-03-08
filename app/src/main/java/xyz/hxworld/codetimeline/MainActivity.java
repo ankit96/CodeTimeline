@@ -1,12 +1,16 @@
 package xyz.hxworld.codetimeline;
 
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
@@ -23,9 +27,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 
 public class MainActivity extends ActionBarActivity
@@ -36,6 +44,8 @@ public class MainActivity extends ActionBarActivity
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private Toolbar mToolbar;
+    private int drawerPosition;
+
     private String jURL = "http://hxworld.xyz/json/hackerrank.php";
     private ArrayList<EventModel> events = new ArrayList<>();
 
@@ -55,7 +65,18 @@ public class MainActivity extends ActionBarActivity
         // Set up the drawer.
         mNavigationDrawerFragment.setup(R.id.fragment_drawer, (DrawerLayout) findViewById(R.id.drawer), mToolbar);
 
-        getHackerrankEvents();
+        //getHackerrankEvents();
+
+        SQLiteDBHandler sqLiteDBHandler = new SQLiteDBHandler(this, MainActivity.this);
+
+        if(isOnline()) {
+            Log.d("Online", "Online");
+            sqLiteDBHandler.getHackerrankEvents();
+        }
+
+        //sqLiteDBHandler.getHackerrankEvents();
+
+        events = sqLiteDBHandler.getAllEvents(drawerPosition);
 
         recyclerView = (RecyclerView) findViewById(R.id.mainList);
         recyclerViewAdapter = new RecyclerViewAdapter(events);
@@ -67,7 +88,8 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
-        Toast.makeText(this, "Menu item selected -> " + position, Toast.LENGTH_SHORT).show();
+        drawerPosition = position;
+        // Toast.makeText(this, "Menu item selected -> " + position, Toast.LENGTH_SHORT).show();
     }
 
 
@@ -108,6 +130,13 @@ public class MainActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
+    public boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
+
     private void getHackerrankEvents()  {
 //        ProgressDialog progressDialog = ProgressDialog.show(this, "", "Loading");
         StringRequest stringRequest = new StringRequest(Request.Method.GET, jURL, new Response.Listener<String>() {
@@ -129,6 +158,28 @@ public class MainActivity extends ActionBarActivity
                                 eventModel.setUrl(event.getString("url"));
                                 eventModel.setStartTime(event.getString("startTime"));
                                 eventModel.setEndTime(event.getString("endTime"));
+                                Date startTime = null, endTime = null;
+                                try {
+                                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                    simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                                    startTime = simpleDateFormat.parse(event.getString("startTime"));
+                                    endTime = simpleDateFormat.parse(event.getString("endTime"));
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+                                if(drawerPosition == 0) {
+                                    if(new Date().before(startTime)) {
+                                        events.add(eventModel);
+                                    }
+                                } else if (drawerPosition == 1) {
+                                    if(new Date().after(startTime) && new Date().before(endTime)) {
+                                        events.add(eventModel);
+                                    }
+                                } else if (drawerPosition == 2) {
+                                    if(new Date().after(endTime)) {
+                                        events.add(eventModel);
+                                    }
+                                }
                                 events.add(eventModel);
                             }
                             runOnUiThread(new Runnable() {
