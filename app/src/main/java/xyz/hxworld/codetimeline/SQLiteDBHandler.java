@@ -66,6 +66,12 @@ public class SQLiteDBHandler extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    public void resetTB() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DROP TABLE IF EXISTS " + TB_Events);
+        onCreate(db);
+    }
+
     public void addEvents(EventModel event) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -79,7 +85,9 @@ public class SQLiteDBHandler extends SQLiteOpenHelper {
         db.insert(TB_Events, null, contentValues);
     }
 
-    public void getHackerrankEvents() {
+    public void getHackerrankEvents(final int position) {
+        resetTB();
+
         StringRequest stringRequest = new StringRequest(Request.Method.GET, jURL, new Response.Listener<String>() {
 
             @Override
@@ -101,14 +109,10 @@ public class SQLiteDBHandler extends SQLiteOpenHelper {
                                 eventModel.setEndTime(event.getString("endTime"));
                                 addEvents(eventModel);
                             }
-                            mainActivity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mainActivity.recyclerViewAdapter.notifyDataSetChanged();
-                                }
-                            });
                         } catch (JSONException e) {
                             e.printStackTrace();
+                        } finally {
+                            getAllEvents(position);
                         }
                     }
                 }).start();
@@ -129,9 +133,8 @@ public class SQLiteDBHandler extends SQLiteOpenHelper {
         stringRequest.setRetryPolicy(new DefaultRetryPolicy(3000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         Volley.newRequestQueue(context).add(stringRequest);
     }
-
-    public ArrayList<EventModel> getAllEvents(int position) {
-        ArrayList<EventModel> eventModelArrayList = new ArrayList<>();
+    public void getAllEvents(int position) {
+        final ArrayList<EventModel> eventModelArrayList = new ArrayList<>();
         String SQLQuery = "SELECT * FROM " + TB_Events;
 
         SQLiteDatabase db = this.getWritableDatabase();
@@ -159,24 +162,33 @@ public class SQLiteDBHandler extends SQLiteOpenHelper {
 
                 switch (position) {
                     case 0:
+                        eventModelArrayList.add(eventModel);
+                    case 1:
                         if(new Date().before(startTime)) {
                             eventModelArrayList.add(eventModel);
                         }
                         break;
-                    case 1:
+                    case 2:
                         if(new Date().after(startTime) && new Date().before(endTime)) {
                             eventModelArrayList.add(eventModel);
                         }
                         break;
-                    case 2:
+                    case 3:
                         if(new Date().after(endTime)) {
                             eventModelArrayList.add(eventModel);
                         }
                         break;
                 }
-                // eventModelArrayList.add(eventModel);
+                mainActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mainActivity.recyclerViewAdapter = new RecyclerViewAdapter(eventModelArrayList);
+                        mainActivity.recyclerView.setAdapter(mainActivity.recyclerViewAdapter);
+                        mainActivity.recyclerViewAdapter.notifyDataSetChanged();
+                    }
+                });
             } while (cursor.moveToNext());
         }
-        return eventModelArrayList;
+        db.close();
     }
 }

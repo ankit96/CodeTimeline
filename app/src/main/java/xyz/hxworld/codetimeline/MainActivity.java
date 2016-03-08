@@ -48,18 +48,16 @@ public class MainActivity extends AppCompatActivity
 
         sqLiteDBHandler = new SQLiteDBHandler(this, MainActivity.this);
 
-        if(isOnline()) {
-            Log.d("Online", "Online");
-            sqLiteDBHandler.getHackerrankEvents();
-        }
-
-        events = sqLiteDBHandler.getAllEvents(drawerPosition);
-
         recyclerView = (RecyclerView) findViewById(R.id.mainList);
-        recyclerViewAdapter = new RecyclerViewAdapter(events);
-        recyclerView.setAdapter(recyclerViewAdapter);
+        //recyclerViewAdapter = new RecyclerViewAdapter(events);
+        //recyclerView.setAdapter(recyclerViewAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        if(isOnline()) {
+            sqLiteDBHandler.getHackerrankEvents(drawerPosition);
+        } else {
+            sqLiteDBHandler.getAllEvents(drawerPosition);
+        }
     }
 
     @Override
