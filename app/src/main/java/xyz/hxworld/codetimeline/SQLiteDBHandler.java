@@ -18,9 +18,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * Created by Kshitij Nagvekar on 3/8/2016.
@@ -143,10 +147,36 @@ public class SQLiteDBHandler extends SQLiteOpenHelper {
                 eventModel.setStartTime(cursor.getString(3));
                 eventModel.setEndTime(cursor.getString(4));
 
-                eventModelArrayList.add(eventModel);
+                Date startTime = null, endTime = null;
+                try {
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    startTime = simpleDateFormat.parse(eventModel.getStartTime());
+                    endTime = simpleDateFormat.parse(eventModel.getEndTime());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+                switch (position) {
+                    case 0:
+                        if(new Date().before(startTime)) {
+                            eventModelArrayList.add(eventModel);
+                        }
+                        break;
+                    case 1:
+                        if(new Date().after(startTime) && new Date().before(endTime)) {
+                            eventModelArrayList.add(eventModel);
+                        }
+                        break;
+                    case 2:
+                        if(new Date().after(endTime)) {
+                            eventModelArrayList.add(eventModel);
+                        }
+                        break;
+                }
+                // eventModelArrayList.add(eventModel);
             } while (cursor.moveToNext());
         }
-
         return eventModelArrayList;
     }
 }

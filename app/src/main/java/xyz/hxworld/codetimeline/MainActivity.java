@@ -1,42 +1,21 @@
 package xyz.hxworld.codetimeline;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ListView;
-import android.widget.Toast;
 
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
 
-
-public class MainActivity extends ActionBarActivity
+public class MainActivity extends AppCompatActivity
         implements NavigationDrawerCallbacks {
 
     /**
@@ -48,6 +27,8 @@ public class MainActivity extends ActionBarActivity
 
     private String jURL = "http://hxworld.xyz/json/hackerrank.php";
     private ArrayList<EventModel> events = new ArrayList<>();
+
+    SQLiteDBHandler sqLiteDBHandler;
 
     RecyclerView recyclerView;
     RecyclerViewAdapter recyclerViewAdapter;
@@ -65,16 +46,12 @@ public class MainActivity extends ActionBarActivity
         // Set up the drawer.
         mNavigationDrawerFragment.setup(R.id.fragment_drawer, (DrawerLayout) findViewById(R.id.drawer), mToolbar);
 
-        //getHackerrankEvents();
-
-        SQLiteDBHandler sqLiteDBHandler = new SQLiteDBHandler(this, MainActivity.this);
+        sqLiteDBHandler = new SQLiteDBHandler(this, MainActivity.this);
 
         if(isOnline()) {
             Log.d("Online", "Online");
             sqLiteDBHandler.getHackerrankEvents();
         }
-
-        //sqLiteDBHandler.getHackerrankEvents();
 
         events = sqLiteDBHandler.getAllEvents(drawerPosition);
 
@@ -89,7 +66,6 @@ public class MainActivity extends ActionBarActivity
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
         drawerPosition = position;
-        // Toast.makeText(this, "Menu item selected -> " + position, Toast.LENGTH_SHORT).show();
     }
 
 
@@ -137,82 +113,4 @@ public class MainActivity extends ActionBarActivity
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
-    private void getHackerrankEvents()  {
-//        ProgressDialog progressDialog = ProgressDialog.show(this, "", "Loading");
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, jURL, new Response.Listener<String>() {
-
-            @Override
-            public void onResponse(final String s) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            JSONObject jsonObject = new JSONObject(s);
-                            JSONObject jsonObject1 = jsonObject.getJSONObject("channel");
-                            JSONArray jsonArray = jsonObject1.getJSONArray("item");
-                            for(int i = 0; i < jsonArray.length(); i++) {
-                                JSONObject event = jsonArray.getJSONObject(i);
-                                EventModel eventModel = new EventModel();
-                                eventModel.setTitle(event.getString("title"));
-                                eventModel.setDescription(event.getString("description"));
-                                eventModel.setUrl(event.getString("url"));
-                                eventModel.setStartTime(event.getString("startTime"));
-                                eventModel.setEndTime(event.getString("endTime"));
-                                Date startTime = null, endTime = null;
-                                try {
-                                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                                    simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-                                    startTime = simpleDateFormat.parse(event.getString("startTime"));
-                                    endTime = simpleDateFormat.parse(event.getString("endTime"));
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
-                                }
-                                if(drawerPosition == 0) {
-                                    if(new Date().before(startTime)) {
-                                        events.add(eventModel);
-                                    }
-                                } else if (drawerPosition == 1) {
-                                    if(new Date().after(startTime) && new Date().before(endTime)) {
-                                        events.add(eventModel);
-                                    }
-                                } else if (drawerPosition == 2) {
-                                    if(new Date().after(endTime)) {
-                                        events.add(eventModel);
-                                    }
-                                }
-                                events.add(eventModel);
-                            }
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    recyclerViewAdapter.notifyDataSetChanged();
-                                }
-                            });
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }).start();
-            }
-        }, new Response.ErrorListener() {
-
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                volleyError.printStackTrace();
-            }
-        }) {
-            protected Map<String,String> getParams() {
-                Map<String, String> params = new HashMap<>();
-
-                return params;
-            }
-        };
-        stringRequest.setRetryPolicy(new DefaultRetryPolicy(3000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        Volley.newRequestQueue(this).add(stringRequest);
-
-//        if (progressDialog != null) {
-//            progressDialog.dismiss();
-//            progressDialog = null;
-//        }
-    }
 }
