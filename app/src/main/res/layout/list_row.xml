@@ -10,7 +10,8 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:textSize="@dimen/title"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:autoLink="none" />
 
     <TextView
         android:id="@+id/url"
@@ -18,7 +19,11 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/title"
         android:layout_marginTop="1dip"
-        android:textSize="@dimen/url" />
+        android:textSize="@dimen/url"
+        android:autoLink="web"
+        android:textColorLink="#747474"
+        android:clickable="true"
+        android:linksClickable="true" />
 
     <TextView
         android:id="@+id/date"

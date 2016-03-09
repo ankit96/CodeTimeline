@@ -92,7 +92,7 @@ public class SQLiteDBHandler extends SQLiteOpenHelper {
 
             @Override
             public void onResponse(final String s) {
-                new Thread(new Runnable() {
+                Thread thread = new Thread(new Runnable() {
                     @Override
                     public void run() {
                         try {
@@ -111,11 +111,16 @@ public class SQLiteDBHandler extends SQLiteOpenHelper {
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
-                        } finally {
-                            getAllEvents(position);
                         }
                     }
-                }).start();
+                });
+                thread.start();
+                try {
+                    thread.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                getAllEvents(position);
             }
         }, new Response.ErrorListener() {
 
@@ -163,6 +168,7 @@ public class SQLiteDBHandler extends SQLiteOpenHelper {
                 switch (position) {
                     case 0:
                         eventModelArrayList.add(eventModel);
+                        break;
                     case 1:
                         if(new Date().before(startTime)) {
                             eventModelArrayList.add(eventModel);
@@ -179,15 +185,16 @@ public class SQLiteDBHandler extends SQLiteOpenHelper {
                         }
                         break;
                 }
-                mainActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mainActivity.recyclerViewAdapter = new RecyclerViewAdapter(eventModelArrayList);
-                        mainActivity.recyclerView.setAdapter(mainActivity.recyclerViewAdapter);
-                        mainActivity.recyclerViewAdapter.notifyDataSetChanged();
-                    }
-                });
             } while (cursor.moveToNext());
+            mainActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mainActivity.recyclerViewAdapter = new RecyclerViewAdapter(eventModelArrayList);
+                    mainActivity.recyclerView.setAdapter(mainActivity.recyclerViewAdapter);
+                    mainActivity.recyclerViewAdapter.notifyDataSetChanged();
+                    mainActivity.setEventsArrayList(eventModelArrayList);
+                }
+            });
         }
         db.close();
     }

@@ -17,7 +17,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private ArrayList<EventModel> events;
 
     public RecyclerViewAdapter(ArrayList<EventModel> events) {
-        this.events = events;
+        this.events = new ArrayList<>(events);
     }
 
     @Override
@@ -34,22 +34,27 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        EventModel e = events.get(position);
+        final EventModel e = events.get(position);
 
-        TextView titleTextView = holder.titleTextView;
-        titleTextView.setText(e.getTitle());
-
-        TextView urlTextView = holder.urlTextView;
-        urlTextView.setText(e.getUrl());
-
-        TextView dateTextView = holder.dateTextView;
-        dateTextView.setText(e.getStartTime() + " - " + e.getEndTime());
+//        TextView titleTextView = holder.titleTextView;
+//        titleTextView.setText(e.getTitle());
+//
+//        TextView urlTextView = holder.urlTextView;
+//        urlTextView.setText(e.getUrl());
+//
+//        TextView dateTextView = holder.dateTextView;
+//        dateTextView.setText(e.getStartTime() + " - " + e.getEndTime());
+        holder.bind(e);
 
     }
 
     @Override
     public int getItemCount() {
         return events.size();
+    }
+
+    public void setEvents(ArrayList<EventModel> events) {
+        this.events = new ArrayList<>(events);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -62,6 +67,63 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             titleTextView = (TextView) itemView.findViewById(R.id.title);
             urlTextView = (TextView) itemView.findViewById(R.id.url);
             dateTextView = (TextView) itemView.findViewById(R.id.date);
+        }
+
+        public void bind(EventModel eventModel) {
+            titleTextView.setText(eventModel.getTitle());
+            urlTextView.setText(eventModel.getUrl());
+            dateTextView.setText(eventModel.getStartTime() + " - " + eventModel.getEndTime());
+        }
+    }
+
+    public EventModel removeItem(int position) {
+        final EventModel model = events.remove(position);
+        notifyItemRemoved(position);
+        return model;
+    }
+
+    public void addItem(int position, EventModel eventModel) {
+        events.add(position, eventModel);
+        notifyItemInserted(position);
+    }
+
+    public void moveItem(int fromPosition, int toPosition) {
+        final EventModel eventModel = events.remove(fromPosition);
+        events.add(toPosition, eventModel);
+        notifyItemMoved(fromPosition, toPosition);
+    }
+
+    public void animateTo(ArrayList<EventModel> e) {
+        applyAndAnimateRemovals(e);
+        applyAndAnimateAdditions(e);
+        applyAndAnimateMovedItems(e);
+    }
+
+    private void applyAndAnimateRemovals(ArrayList<EventModel> newModels) {
+        for (int i = events.size() - 1; i >= 0; i--) {
+            final EventModel model = events.get(i);
+            if (!newModels.contains(model)) {
+                removeItem(i);
+            }
+        }
+    }
+
+    private void applyAndAnimateAdditions(ArrayList<EventModel> newModels) {
+        for (int i = 0, count = newModels.size(); i < count; i++) {
+            final EventModel model = newModels.get(i);
+            if (!events.contains(model)) {
+                addItem(i, model);
+            }
+        }
+    }
+
+    private void applyAndAnimateMovedItems(ArrayList<EventModel> newModels) {
+        for (int toPosition = newModels.size() - 1; toPosition >= 0; toPosition--) {
+            final EventModel model = newModels.get(toPosition);
+            final int fromPosition = events.indexOf(model);
+            if (fromPosition >= 0 && fromPosition != toPosition) {
+                moveItem(fromPosition, toPosition);
+            }
         }
     }
 }
