@@ -1,37 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/list_row_selector"
-    android:padding="8dp" >
+    android:layout_height="match_parent"
+    android:background="@drawable/list_row_selector">
 
-    <TextView
-        android:id="@+id/title"
+    <android.support.v7.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textSize="@dimen/title"
-        android:textStyle="bold"
-        android:autoLink="none" />
+        android:id="@+id/card_view"
+        android:layout_marginRight="@dimen/activity_vertical_margin"
+        card_view:cardPreventCornerOverlap="false"
+        card_view:cardUseCompatPadding="true">
 
-    <TextView
-        android:id="@+id/url"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/title"
-        android:layout_marginTop="1dip"
-        android:textSize="@dimen/url"
-        android:autoLink="web"
-        android:textColorLink="#747474"
-        android:clickable="true"
-        android:linksClickable="true" />
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp">
 
-    <TextView
-        android:id="@+id/date"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/url"
-        android:layout_marginTop="5dp"
-        android:textColor="@color/date"
-        android:textSize="@dimen/date" />
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/title"
+                android:textStyle="bold" />
 
-</RelativeLayout>
+            <TextView
+                android:id="@+id/url"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/title"
+                android:layout_marginTop="1dip"
+                android:textSize="@dimen/url"
+                android:autoLink="web"
+                android:textColorLink="#747474"
+                android:clickable="true"
+                android:linksClickable="true"/>
+
+            <TextView
+                android:id="@+id/date"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/url"
+                android:layout_marginTop="5dp"
+                android:textColor="@color/date"
+                android:textSize="@dimen/date" />
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>

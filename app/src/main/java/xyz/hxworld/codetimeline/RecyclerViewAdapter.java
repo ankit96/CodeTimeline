@@ -1,6 +1,7 @@
 package xyz.hxworld.codetimeline;
 
 import android.content.Context;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,12 +59,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
+        public CardView cardView;
         public TextView titleTextView;
         public TextView urlTextView;
         public TextView dateTextView;
 
         public ViewHolder(View itemView) {
             super(itemView);
+            cardView = (CardView) itemView.findViewById(R.id.card_view);
             titleTextView = (TextView) itemView.findViewById(R.id.title);
             urlTextView = (TextView) itemView.findViewById(R.id.url);
             dateTextView = (TextView) itemView.findViewById(R.id.date);
